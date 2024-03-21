@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo App</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 h-screen flex justify-center items-center">
+    <div class="bg-white rounded-lg shadow-md p-8 w-full max-w-md">
+        <h1 class="text-3xl font-bold text-center mb-6 text-gray-800">Todo App</h1>
+        <div class="flex items-center mb-6">
+            <input type="text" id="todo-text" placeholder="Enter todo text" class="flex-grow py-2 px-4 border border-gray-300 rounded-l-md focus:outline-none focus:ring-1 focus:ring-blue-500">
+            <button onclick="addTodo()" class="py-2 px-4 bg-blue-500 text-white rounded-md ml-2 hover:bg-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-500">Add Todo</button>
+        </div>
+        <ul id="todo-list" class="divide-y divide-gray-300">
+            <!-- Todo items will be added here dynamically -->
+        </ul>
+        <p id="no-todos" class="text-center text-gray-500 mt-4">No todos yet</p>
+    </div>
+
+    <script>
+        // Load todos from local storage
+        function loadTodos() {
+            var todos = JSON.parse(localStorage.getItem("todos")) || [];
+            var todoList = document.getElementById("todo-list");
+            var noTodosMsg = document.getElementById("no-todos");
+
+            todoList.innerHTML = ""; // Clear existing todos
+
+            todos.forEach(function (todoText) {
+                var todoItem = createTodoItem(todoText);
+                todoList.appendChild(todoItem);
+            });
+
+            if (todos.length === 0) {
+                noTodosMsg.style.display = "block";
+            } else {
+                noTodosMsg.style.display = "none";
+            }
+        }
+
+        // Call loadTodos when the page loads
+        document.addEventListener("DOMContentLoaded", loadTodos);
+
+        // Add todo function
+        function addTodo() {
+            var todoText = document.getElementById("todo-text").value;
+
+            if (todoText.trim() === "") {
+                alert("Please enter todo text.");
+                return;
+            }
+
+            var todoList = document.getElementById("todo-list");
+            var todoItem = createTodoItem(todoText);
+            todoList.appendChild(todoItem);
+            document.getElementById("no-todos").style.display = "none";
+
+            // Save todos to local storage
+            saveTodos();
+
+            // Clear input field
+            document.getElementById("todo-text").value = "";
+        }
+
+        // Create todo item element
+        function createTodoItem(todoText) {
+            var todoItem = document.createElement("li");
+            todoItem.className = "flex justify-between items-center py-4";
+            var todoTextDiv = document.createElement("div");
+            todoTextDiv.textContent = todoText;
+            var editButton = document.createElement("button");
+            editButton.textContent = "Edit";
+            editButton.className = "text-blue-600";
+            editButton.onclick = function () {
+                var editText = prompt("Edit todo:", todoTextDiv.textContent);
+                if (editText !== null) {
+                    todoTextDiv.textContent = editText;
+                    saveTodos();
+                }
+            };
+            var removeButton = document.createElement("button");
+            removeButton.textContent = "Remove";
+            removeButton.className = "text-red-600";
+            removeButton.onclick = function () {
+                todoItem.remove();
+                saveTodos();
+                if (document.getElementById("todo-list").children.length === 0) {
+                    document.getElementById("no-todos").style.display = "block";
+                }
+            };
+
+            todoItem.appendChild(todoTextDiv);
+            todoItem.appendChild(editButton);
+            todoItem.appendChild(removeButton);
+
+            return todoItem;
+        }
+
+        // Save todos to local storage
+        function saveTodos() {
+            var todos = [];
+            var todoList = document.getElementById("todo-list").children;
+
+            for (var i = 0; i < todoList.length; i++) {
+                todos.push(todoList[i].firstElementChild.textContent);
+            }
+
+            localStorage.setItem("todos", JSON.stringify(todos));
+        }
+    </script>
+</body>
+</html>
